@@ -140,19 +140,32 @@ function placeBomb(){
 
 function explode(b){
   const cells=[{x:b.x,y:b.y}];
+  let softBlocks=[];
+
   for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
     for(let i=1;i<=b.range;i++){
       const nx=b.x+dx*i, ny=b.y+dy*i;
       if(state.grid[ny][nx]===HARD) break;
       cells.push({x:nx,y:ny});
       if(state.grid[ny][nx]===SOFT){
-        // ゴールは必ず1つだけ生成
-        if(!state.exit){ state.exit={x:nx,y:ny}; }
+        softBlocks.push({x:nx,y:ny});
         state.grid[ny][nx]=FLOOR;
         break;
       }
     }
   }
+
+  // === ゴール生成 ===
+  if(!state.exit && softBlocks.length>0){
+    // プレイヤーから一番遠いSOFTブロックを選ぶ
+    let far=null, maxDist=-1;
+    for(const s of softBlocks){
+      const dist = Math.abs(s.x - state.player.x) + Math.abs(s.y - state.player.y);
+      if(dist > maxDist){ maxDist=dist; far=s; }
+    }
+    if(far) state.exit={x:far.x, y:far.y};
+  }
+
   for(const c of cells) state.flames.push({x:c.x,y:c.y,ttl:20});
   b.done=true;
 }
