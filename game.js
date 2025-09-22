@@ -2,7 +2,7 @@ const TILE = 32;
 const COLS = 15;
 const ROWS = 13;
 
-const FLOOR=0,HARD=1,SOFT=2,EXIT=3;
+const FLOOR=0,HARD=1,SOFT=2;
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 canvas.width=COLS*TILE; canvas.height=ROWS*TILE;
@@ -16,7 +16,7 @@ function resetGame(){
     player:{x:1,y:1},
     bombs:[], flames:[],
     enemies:spawnEnemies(3),
-    exit:null,
+    exit:null, // ゴールは最初は隠し
     tick:0, cleared:false, over:false
   };
 }
@@ -86,23 +86,32 @@ function draw(){
     if(c===HARD){ ctx.fillStyle="#475569"; ctx.fillRect(x*TILE,y*TILE,TILE,TILE); }
     if(c===SOFT){ ctx.fillStyle="#64748b"; ctx.fillRect(x*TILE+4,y*TILE+4,TILE-8,TILE-8); }
   }
-  // 爆弾
-  ctx.fillStyle="black";
-  for(const b of state.bombs) ctx.fillRect(b.x*TILE+8,b.y*TILE+8,16,16);
+
+  // 爆弾（紫色）
+  for(const b of state.bombs){
+    const gx=b.x*TILE+16, gy=b.y*TILE+16;
+    const grad=ctx.createRadialGradient(gx,gy,2,gx,gy,14);
+    grad.addColorStop(0,"#f0abfc");
+    grad.addColorStop(1,"#7e22ce");
+    ctx.fillStyle=grad;
+    ctx.beginPath();
+    ctx.arc(gx,gy,12,0,Math.PI*2);
+    ctx.fill();
+  }
 
   // 炎
   ctx.fillStyle="orange";
   for(const f of state.flames) ctx.fillRect(f.x*TILE+4,f.y*TILE+4,TILE-8,TILE-8);
 
-  // 敵
+  // 敵（風船）
   ctx.fillStyle="pink";
   for(const e of state.enemies){
     ctx.beginPath(); ctx.arc(e.x*TILE+16,e.y*TILE+16,14,0,Math.PI*2); ctx.fill();
   }
 
-  // ゴール
+  // ゴール（必ず1個だけ）
   if(state.exit){
-    ctx.strokeStyle="violet"; ctx.lineWidth=3;
+    ctx.strokeStyle="yellow"; ctx.lineWidth=3;
     ctx.strokeRect(state.exit.x*TILE+6,state.exit.y*TILE+6,TILE-12,TILE-12);
   }
 
@@ -137,10 +146,8 @@ function explode(b){
       if(state.grid[ny][nx]===HARD) break;
       cells.push({x:nx,y:ny});
       if(state.grid[ny][nx]===SOFT){
-        // ゴールをランダムで生成
-        if(!state.exit && Math.random()<0.2){
-          state.exit={x:nx,y:ny};
-        }
+        // ゴールは必ず1つだけ生成
+        if(!state.exit){ state.exit={x:nx,y:ny}; }
         state.grid[ny][nx]=FLOOR;
         break;
       }
