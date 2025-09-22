@@ -1,16 +1,17 @@
 body {
   margin: 0;
-  background: #222;
+  background: #111;
   color: #eee;
   font-family: sans-serif;
   text-align: center;
 }
 
 canvas {
-  background: #333;
+  background: #1a2233;
   image-rendering: pixelated;
   margin-top: 10px;
-  border: 4px solid #555;
+  border: 4px solid #333;
+  border-radius: 8px;
 }
 
 .touchpad {
