@@ -16,7 +16,7 @@ function resetGame(){
     player:{x:1,y:1},
     bombs:[], flames:[],
     enemies:spawnEnemies(3),
-    exit:null, // ゴールは最初は隠し
+    exit:null, // ゴールは最初は隠す
     tick:0, cleared:false, over:false
   };
 }
@@ -87,7 +87,7 @@ function draw(){
     if(c===SOFT){ ctx.fillStyle="#64748b"; ctx.fillRect(x*TILE+4,y*TILE+4,TILE-8,TILE-8); }
   }
 
-  // 爆弾（紫色）
+  // 爆弾（紫グラデーション）
   for(const b of state.bombs){
     const gx=b.x*TILE+16, gy=b.y*TILE+16;
     const grad=ctx.createRadialGradient(gx,gy,2,gx,gy,14);
@@ -123,21 +123,6 @@ function draw(){
   if(state.over) msg("💀 GAME OVER");
 }
 
-function msg(t){
-  ctx.fillStyle="rgba(0,0,0,0.5)";
-  ctx.fillRect(0,canvas.height/2-30,canvas.width,60);
-  ctx.fillStyle="white"; ctx.font="28px sans-serif";
-  ctx.textAlign="center";
-  ctx.fillText(t,canvas.width/2,canvas.height/2+10);
-}
-
-function placeBomb(){
-  if(state.over||state.cleared) return;
-  const {x,y}=state.player;
-  if(isBomb(x,y)) return;
-  state.bombs.push({x,y,timer:60,range:2,done:false});
-}
-
 function explode(b){
   const cells=[{x:b.x,y:b.y}];
   let softBlocks=[];
@@ -155,9 +140,8 @@ function explode(b){
     }
   }
 
-  // === ゴール生成 ===
+  // === ゴール生成（プレイヤーから最も遠い場所）===
   if(!state.exit && softBlocks.length>0){
-    // プレイヤーから一番遠いSOFTブロックを選ぶ
     let far=null, maxDist=-1;
     for(const s of softBlocks){
       const dist = Math.abs(s.x - state.player.x) + Math.abs(s.y - state.player.y);
@@ -169,27 +153,3 @@ function explode(b){
   for(const c of cells) state.flames.push({x:c.x,y:c.y,ttl:20});
   b.done=true;
 }
-
-function isBomb(x,y){ return state.bombs.some(b=>!b.done&&b.x===x&&b.y===y); }
-function randomDir(){ return ["up","down","left","right"][(Math.random()*4)|0]; }
-function gameOver(r){ state.over=true; console.log(r); }
-
-function tryMove(dir){
-  if(state.over||state.cleared) return;
-  const [dx,dy]=DIRS[dir]; const nx=state.player.x+dx, ny=state.player.y+dy;
-  if(state.grid[ny][nx]===FLOOR && !isBomb(nx,ny)){ state.player.x=nx; state.player.y=ny; }
-}
-
-document.addEventListener("keydown",e=>{
-  if(e.key==="ArrowUp")tryMove("up");
-  if(e.key==="ArrowDown")tryMove("down");
-  if(e.key==="ArrowLeft")tryMove("left");
-  if(e.key==="ArrowRight")tryMove("right");
-  if(e.key===" ")placeBomb();
-});
-
-document.querySelectorAll(".dpad button").forEach(b=>b.addEventListener("click",()=>tryMove(b.dataset.dir)));
-document.getElementById("bombBtn").addEventListener("click",placeBomb);
-
-function loop(){ update(); draw(); requestAnimationFrame(loop); }
-resetGame(); loop();
