@@ -2,25 +2,27 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ボンバーマン</title>
+  <title>ボンバーマン風ゲーム</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="game"></div>
+  <h1>🎈 ボンバーマン風ゲーム</h1>
+  <canvas id="game"></canvas>
 
-  <!-- スマホ用ボタン -->
-  <div id="controls">
+  <!-- スマホ用操作パッド -->
+  <div class="touchpad">
     <div class="dpad">
-      <button id="up">↑</button>
+      <button data-dir="up">▲</button>
       <div>
-        <button id="left">←</button>
-        <button id="right">→</button>
+        <button data-dir="left">◀</button>
+        <button data-dir="right">▶</button>
       </div>
-      <button id="down">↓</button>
+      <button data-dir="down">▼</button>
     </div>
-    <button id="bomb">💣</button>
+    <button id="bombBtn">💣</button>
   </div>
 
-  <script src="script.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
